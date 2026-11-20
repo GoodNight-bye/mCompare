@@ -5,6 +5,7 @@ import {
   joinLocation,
   joinLocationPath,
   locKey,
+  parsePortInput,
   resolveLocationInput,
   sameLocation,
   splitMasks,
@@ -34,6 +35,25 @@ const remote = (connectionId: string, path: string): Location => ({
   kind: 'remote',
   connectionId,
   path
+})
+
+describe('parsePortInput', () => {
+  it('allows clearing the field and defaults to 22', () => {
+    expect(parsePortInput('')).toBe(22)
+    expect(parsePortInput('   ')).toBe(22)
+  })
+
+  it('accepts valid ports and trims whitespace', () => {
+    expect(parsePortInput('22')).toBe(22)
+    expect(parsePortInput(' 2222 ')).toBe(2222)
+    expect(parsePortInput('65535')).toBe(65535)
+  })
+
+  it('rejects invalid ports', () => {
+    for (const value of ['0', '65536', '-1', '22.5', 'abc']) {
+      expect(() => parsePortInput(value)).toThrow('端口必须是 1-65535 的整数')
+    }
+  })
 })
 
 describe('resolveLocationInput', () => {
