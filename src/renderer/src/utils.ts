@@ -157,6 +157,20 @@ export function splitMasks(text: string): string[] {
   return normalizeGlobPatterns([text])
 }
 
+/**
+ * Parse the SSH port field. An empty value means "use the default 22", so the
+ * user can clear the input while typing instead of it snapping back to 22.
+ */
+export function parsePortInput(raw: string): number {
+  const trimmed = raw.trim()
+  if (!trimmed) return 22
+  const port = Number(trimmed)
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error('端口必须是 1-65535 的整数')
+  }
+  return port
+}
+
 export function joinLocation(loc: Location, relPath: string): Location {
   const path = joinLocationPath(loc, relPath)
   return loc.kind === 'local'

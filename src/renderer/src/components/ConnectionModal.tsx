@@ -1,7 +1,7 @@
 import { useEffect, useState, type JSX } from 'react'
 import type { ConnectionView } from '../../../shared/types'
 import type { Notify } from '../tabs'
-import { errText } from '../utils'
+import { errText, parsePortInput } from '../utils'
 
 interface Props {
   connections: ConnectionView[]
@@ -13,12 +13,13 @@ interface Props {
 interface FormState {
   name: string
   host: string
-  port: number
+  /** Kept as text so the field can be cleared entirely while typing. */
+  port: string
   username: string
   password: string
 }
 
-const blankForm: FormState = { name: '', host: '', port: 22, username: '', password: '' }
+const blankForm: FormState = { name: '', host: '', port: '22', username: '', password: '' }
 
 export default function ConnectionModal({
   connections,
@@ -52,7 +53,7 @@ export default function ConnectionModal({
     setForm({
       name: connection.name,
       host: connection.host,
-      port: connection.port,
+      port: String(connection.port),
       username: connection.username,
       password: ''
     })
@@ -71,7 +72,7 @@ export default function ConnectionModal({
     id: editingId || undefined,
     name: form.name,
     host: form.host,
-    port: Number(form.port) || 22,
+    port: parsePortInput(form.port),
     username: form.username,
     password: form.password || undefined
   })
@@ -220,10 +221,12 @@ export default function ConnectionModal({
                 <span>端口</span>
                 <input
                   type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={65535}
                   value={form.port}
-                  onChange={(event) =>
-                    setForm({ ...form, port: Number(event.target.value) || 22 })
-                  }
+                  placeholder="22"
+                  onChange={(event) => setForm({ ...form, port: event.target.value })}
                 />
               </label>
               <label className="field">
